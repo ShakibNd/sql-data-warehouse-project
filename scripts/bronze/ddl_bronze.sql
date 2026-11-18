@@ -1,137 +1,61 @@
-EXEC bronze.load_bronze
-IF OBJECT_ID('bronze.load_bronze','P') IS NOT NULL
-	DROP PROCEDURE bronze.load_bronze;
+IF OBJECT_ID('bronze.crm_cust_info', 'U') IS not NULL
+	drop table bronze.crm_cust_info;
+create table bronze.crm_cust_info(
+	cst_id int,
+	cst_key nvarchar(50),
+	cst_first_name nvarchar(50),
+	cst_last_name nvarchar(50),
+	cst_marital_status nvarchar(50),
+	cst_gndr nvarchar(50),
+	cst_create_date date
+	);
 
-GO
-CREATE PROCEDURE bronze.load_bronze AS
-BEGIN
-	DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME;
-	BEGIN TRY
-		SET @batch_start_time = GETDATE();
-		PRINT '====================================================';
-		PRINT 'Loading Bronze layer';
-		PRINT '====================================================';
+IF OBJECT_ID('bronze.crm_prd_info', 'U') IS not NULL
+	drop table bronze.crm_prd_info;
+create table bronze.crm_prd_info(
+prd_id int,
+prd_key nvarchar(50),
+prd_nm nvarchar(50),
+prd_cost int,
+prd_line nvarchar(50),
+prd_start_dt datetime,
+prd_end_dt datetime
+);
 
-		PRINT '----------------------------------------------------';
-		PRINT 'Loading CRM Tables';
-		PRINT '----------------------------------------------------';
-	
-		SET @start_time = GETDATE();
-		PRINT 'Truncating Table: bronze.crm_cust_info';
-		TRUNCATE TABLE bronze.crm_cust_info;
+IF OBJECT_ID('bronze.crm_sales_details', 'U') IS not NULL
+	drop table bronze.crm_sales_details;
+create table bronze.crm_sales_details (
+	sls_ord_num nvarchar(50),
+	sls_prd_key nvarchar(50),
+	sls_cust_id int,
+	sls_order_dt int,
+	sls_ship_dt int,
+	sls_due_dt int,
+	sls_sales int,
+	sls_quantity int,
+	sls_price int);
 
-		PRINT 'Inserting Data Into Table: bronze.crm_cust_info';
-		BULK INSERT bronze.crm_cust_info
-		FROM 'C:\Users\Spade\Downloads\Source_CRM\cust_info.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST (DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'Seconds'
-		PRINT '-----------------'
+IF OBJECT_ID('bronze.erp_loc_a101', 'U') IS not NULL
+	drop table bronze.erp_loc_a101;
+create table bronze.erp_loc_a101 (
+	cid nvarchar(50),
+	centry nvarchar(50)
+	);
 
-		SET @start_time = GETDATE();
-		PRINT 'Truncating Table: bronze.crm_prd_info';
-		TRUNCATE TABLE bronze.crm_prd_info;
+IF OBJECT_ID('bronze.erp_cust_az12', 'U') IS not NULL
+	drop table bronze.erp_cust_az12;
+create table bronze.erp_cust_az12 (
+	cid nvarchar(50),
+	bdate date,
+	gen nvarchar(50)
+	);
 
-		PRINT 'Inserting Data Into Table: bronze.crm_prd_info';
-		BULK INSERT bronze.crm_prd_info
-		FROM 'C:\Users\Spade\Downloads\Source_CRM\prd_info.csv'
-		WITH (
-			FIRSTROW = 2,
-			fieldterminator = ',',
-			TABLOCK
-		);
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST (DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'Seconds'
-		PRINT '-----------------'
+IF OBJECT_ID('bronze.erp_px_cat_glv2', 'U') IS not NULL
+	drop table bronze.erp_px_cat_glv2;
+create table bronze.erp_px_cat_glv2 (
+	id nvarchar(50),
+	cat nvarchar (50),
+	subcat nvarchar(50),
+	maintenance nvarchar(50)
+	);
 
-		SET @start_time = GETDATE();
-		PRINT 'Truncating Table: bronze.crm_sales_details';
-		TRUNCATE TABLE bronze.crm_sales_details;
-
-		PRINT 'Inserting Data Into Table: bronze.crm_sales_details';
-		BULK INSERT bronze.crm_sales_details
-		FROM 'C:\Users\Spade\Downloads\Source_CRM\sales_details.csv'
-		WITH (
-			FIRSTROW = 2,
-			fieldterminator = ',',
-			TABLOCK
-		);
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST (DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'Seconds'
-		PRINT '-----------------'
-
-
-		PRINT '----------------------------------------------------';
-		PRINT 'Loading ERP Tables';
-		PRINT '----------------------------------------------------';
-
-		SET @start_time = GETDATE();
-		PRINT 'Truncating Table: bronze.erp_loc_a101';
-		TRUNCATE TABLE bronze.erp_loc_a101;
-
-		PRINT 'Inserting Data Into Table: bronze.erp_loc_a101';
-		BULK INSERT bronze.erp_loc_a101
-		FROM 'C:\Users\Spade\Downloads\Source_ERP\loc_a101.csv'
-		WITH (
-			FIRSTROW = 2,
-			fieldterminator = ',',
-			TABLOCK
-		);
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST (DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'Seconds'
-		PRINT '-----------------'
-
-		SET @start_time = GETDATE();
-		PRINT 'Truncating Table: bronze.erp_CUST_AZ12';
-		TRUNCATE TABLE bronze.erp_CUST_AZ12;
-
-		PRINT 'Inserting Data Into Table: bronze.erp_CUST_AZ12';
-		BULK INSERT bronze.erp_CUST_AZ12
-		FROM 'C:\Users\Spade\Downloads\Source_ERP\CUST_AZ12.csv'
-		WITH (
-			FIRSTROW = 2,
-			fieldterminator = ',',
-			TABLOCK
-		);
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST (DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'Seconds'
-		PRINT '-----------------'
-
-		SET @start_time = GETDATE();
-		PRINT 'Truncating Table: bronze.erp_PX_CAT_GlV2';
-		TRUNCATE TABLE bronze.erp_PX_CAT_GlV2;
-
-		PRINT 'Inserting Data Into Table: bronze.erp_PX_CAT_GlV2';
-		BULK INSERT bronze.erp_PX_CAT_GlV2
-		FROM 'C:\Users\Spade\Downloads\Source_ERP\PX_CAT_G1V2.csv'
-		WITH (
-			FIRSTROW = 2,
-			fieldterminator = ',',
-			TABLOCK
-		);
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST (DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'Seconds'
-		PRINT '-----------------'
-
-		SET @batch_end_time = GETDATE();
-		PRINT '===================================================='
-		PRINT 'Loading Bronze Layer is Completed';
-		PRINT '===================================================='
-		PRINT '    - Total Load Duration: ' + CAST (DATEDIFF(second, @batch_start_time, @batch_end_time) AS NVARCHAR) + 'Seconds'
-		PRINT '===================================================='
-
-	END TRY
-	BEGIN CATCH
-		PRINT '====================================================';
-		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER';
-		PRINT 'ERROR MESSAGE:' + ERROR_MESSAGE();
-		PRINT 'ERROR NUMBER:' + CAST (ERROR_NUMBER() AS NVARCHAR);
-		PRINT 'ERROR STATE:' + CAST (ERROR_STATE() AS NVARCHAR);
-		PRINT '====================================================';
-
-	END CATCH
-END
